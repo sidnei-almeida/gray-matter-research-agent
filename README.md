@@ -226,8 +226,7 @@ gray-matter-research-agent/
 │   ├── utils/                     # IDs, titles, date groups, tool routing
 │   ├── styles/                    # Lab theme tokens and layout
 │   └── data/                      # Suggested prompts, lab tools metadata
-├── old-research-agent/            # Legacy HTML reference (GPL-3.0)
-├── readme_model.md                # README style reference
+├── old-research-agent/            # Legacy HTML reference (GPL-3.0), local only
 ├── vercel.json
 ├── .env.example
 └── index.html
