@@ -1,0 +1,57 @@
+@import './tokens.css';
+@import './native-theme.css';
+@import './lab-dialog.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-app);
+  background-image:
+    linear-gradient(rgba(4, 12, 5, 0.38), rgba(3, 9, 4, 0.52)),
+    url('../../images/background 2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+a {
+  color: var(--accent-toxic);
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}

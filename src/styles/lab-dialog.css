@@ -1,0 +1,155 @@
+.lab-dialog-root {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.lab-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgba(2, 5, 3, 0.72);
+  backdrop-filter: blur(6px);
+  cursor: default;
+}
+
+.lab-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 420px);
+  padding: 1.35rem 1.4rem 1.25rem;
+  border-radius: 12px;
+  border-color: var(--border-strong);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(151, 196, 85, 0.08) inset;
+  animation: lab-dialog-in 0.22s ease-out;
+}
+
+.lab-dialog--danger {
+  border-color: rgba(248, 113, 113, 0.28);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.55),
+    0 0 32px rgba(248, 113, 113, 0.06);
+}
+
+.lab-dialog-header {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+}
+
+.lab-dialog-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--accent-green-soft);
+  color: var(--accent-toxic);
+  border: 1px solid var(--border-subtle);
+}
+
+.lab-dialog-icon--danger {
+  background: var(--accent-danger-soft);
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.22);
+}
+
+.lab-dialog-heading {
+  min-width: 0;
+}
+
+.lab-dialog-kicker {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-green);
+}
+
+.lab-dialog-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.lab-dialog-description {
+  margin: 0 0 1.15rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.lab-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.lab-dialog-btn {
+  padding: 0.5rem 0.95rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s;
+}
+
+.lab-dialog-btn--ghost {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.lab-dialog-btn--ghost:hover {
+  background: rgba(151, 196, 85, 0.06);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.lab-dialog-btn--primary {
+  background: linear-gradient(180deg, rgba(151, 196, 85, 0.28), rgba(151, 196, 85, 0.14));
+  border-color: var(--border-strong);
+  color: var(--accent-toxic);
+}
+
+.lab-dialog-btn--primary:hover {
+  background: linear-gradient(180deg, rgba(151, 196, 85, 0.38), rgba(151, 196, 85, 0.2));
+}
+
+.lab-dialog-btn--danger {
+  background: linear-gradient(180deg, rgba(248, 113, 113, 0.22), rgba(248, 113, 113, 0.1));
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fecaca;
+}
+
+.lab-dialog-btn--danger:hover {
+  background: linear-gradient(180deg, rgba(248, 113, 113, 0.32), rgba(248, 113, 113, 0.16));
+}
+
+@keyframes lab-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

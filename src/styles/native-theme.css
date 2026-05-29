@@ -1,0 +1,85 @@
+/* Align native browser chrome with Gray Matter LABS */
+
+html {
+  color-scheme: dark;
+}
+
+::selection {
+  background: rgba(151, 196, 85, 0.32);
+  color: var(--text-primary);
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-green);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline-color: var(--accent-toxic);
+}
+
+/* Scrollbars — Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(151, 196, 85, 0.38) rgba(5, 8, 5, 0.85);
+}
+
+/* Scrollbars — Chromium / WebKit */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(5, 8, 5, 0.75);
+  border-radius: 9px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(151, 196, 85, 0.28);
+  border-radius: 9px;
+  border: 2px solid rgba(5, 8, 5, 0.75);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(151, 196, 85, 0.48);
+}
+
+::-webkit-scrollbar-corner {
+  background: rgba(5, 8, 5, 0.85);
+}
+
+/* Textareas and inputs */
+textarea,
+input[type='text'],
+input[type='search'],
+input[type='email'] {
+  color-scheme: dark;
+}
+
+textarea::placeholder,
+input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+/* Autofill (Chromium) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0 1000px rgba(10, 16, 9, 0.95) inset;
+  caret-color: var(--accent-toxic);
+  transition: background-color 99999s ease-out 0s;
+}
