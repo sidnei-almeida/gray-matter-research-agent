@@ -1,20 +1,40 @@
-:root {
-  --bg-app: #050805;
-  --bg-panel: rgba(10, 16, 9, 0.86);
-  --bg-card: rgba(16, 24, 13, 0.82);
-  --border-subtle: rgba(151, 196, 85, 0.14);
-  --border-strong: rgba(151, 196, 85, 0.32);
-  --text-primary: #eef4e4;
-  --text-secondary: #c4ceb8;
-  --text-muted: #87927a;
-  --accent-green: #97c455;
-  --accent-green-soft: rgba(151, 196, 85, 0.14);
-  --accent-toxic: #b6ef62;
-  --accent-danger: #f87171;
-  --accent-danger-soft: rgba(248, 113, 113, 0.12);
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap');
 
+:root {
+  /* ── Core palette ── */
+  --bg-primary: #080c08;
+  --bg-secondary: #0d130d;
+  --bg-card: #111811;
+  --bg-card-hover: #162016;
+  --border-subtle: #1e2e1e;
+  --border-accent: #2a4a2a;
+  --green-primary: #4caf50;
+  --green-dim: #2e5c30;
+  --green-glow: rgba(76, 175, 80, 0.15);
+  --text-primary: #d4e8d4;
+  --text-secondary: #7a9e7a;
+  --text-tertiary: #4a6b4a;
+  --warning-amber: #b8860b;
+  --warning-bg: rgba(184, 134, 11, 0.08);
+
+  /* ── Typography ── */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --font-body: var(--font-mono);
+  --font-sans: var(--font-body);
+
+  /* ── Legacy aliases (existing components) ── */
+  --bg-app: var(--bg-primary);
+  --bg-panel: rgba(13, 19, 13, 0.94);
+  --accent-green: var(--green-primary);
+  --accent-green-soft: var(--green-glow);
+  --accent-toxic: #72d276;
+  --accent-danger: #e57373;
+  --accent-danger-soft: rgba(229, 115, 115, 0.12);
+  --text-muted: var(--text-secondary);
+  --border-strong: var(--border-accent);
+
+  /* ── Layout ── */
   --sidebar-width: 280px;
   --tools-width: 340px;
-  --font-sans: Inter, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }

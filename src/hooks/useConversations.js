@@ -31,16 +31,33 @@ function getInitialState() {
   return { conversations, activeConversationId };
 }
 
+function getLastFollowUpSuggestions(conversation) {
+  if (!conversation?.messages?.length) return [];
+  for (let i = conversation.messages.length - 1; i >= 0; i -= 1) {
+    const msg = conversation.messages[i];
+    if (msg.role === 'assistant' && msg.status === 'sent' && msg.followUpQuestions?.length) {
+      return msg.followUpQuestions.slice(0, 4);
+    }
+  }
+  return [];
+}
+
 export function useConversations() {
   const { confirm } = useLabDialog();
   const [state, setState] = useState(getInitialState);
   const [isSending, setIsSending] = useState(false);
+  const [deepMode, setDeepMode] = useState(false);
 
   const { conversations, activeConversationId } = state;
 
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeConversationId) || null,
     [conversations, activeConversationId]
+  );
+
+  const composerSuggestions = useMemo(
+    () => getLastFollowUpSuggestions(activeConversation),
+    [activeConversation]
   );
 
   useEffect(() => {
@@ -149,10 +166,11 @@ export function useConversations() {
   }, []);
 
   const sendMessage = useCallback(
-    async (content) => {
+    async (content, options = {}) => {
       const trimmed = content.trim();
       if (!trimmed || !activeConversationId || isSending) return;
 
+      const useDeep = Boolean(options.deep ?? deepMode);
       const conv = conversations.find((c) => c.id === activeConversationId);
       if (!conv) return;
 
@@ -165,16 +183,20 @@ export function useConversations() {
         content: trimmed,
         timestamp: new Date().toISOString(),
         status: 'sent',
+        researchMode: useDeep ? 'deep' : 'chat',
       };
 
       addMessage(activeConversationId, userMessage);
 
       const assistantId = createId();
+      const loadingText = useDeep
+        ? 'Running deep research (arXiv + web, may take up to 2 min)…'
+        : 'Running research protocol…';
 
       addMessage(activeConversationId, {
         id: assistantId,
         role: 'assistant',
-        content: 'Running research protocol…',
+        content: loadingText,
         timestamp: new Date().toISOString(),
         status: 'loading',
       });
@@ -184,19 +206,34 @@ export function useConversations() {
       try {
         const response = await runResearchAgent({
           query: trimmed,
-          conversationHistory: history.slice(-8),
+          conversationHistory: useDeep ? [] : history.slice(-8),
+          mode: useDeep ? 'deep' : 'chat',
+          depth: useDeep ? 'deep' : 'standard',
         });
 
         updateMessage(activeConversationId, assistantId, {
-          content: response.content,
+          content: response.content || 'No answer returned from the research agent.',
           status: 'sent',
           toolUsed: response.toolUsed,
+          toolsUsed: response.toolsUsed || [],
+          structured: response.structured || null,
+          intent: response.intent || null,
+          researchPlan: response.researchPlan || [],
           sources: response.sources || [],
+          papers: response.papers || [],
+          confidence: response.confidence || null,
+          confidenceScore: response.confidenceScore ?? null,
+          limitations: response.limitations || [],
+          followUpQuestions: response.followUpQuestions || [],
+          processingTime: response.processingTime ?? null,
+          researchDepth: response.researchDepth || (useDeep ? 'deep' : null),
+          researchMode: response.mode || (useDeep ? 'deep' : 'chat'),
           timestamp: new Date().toISOString(),
         });
-      } catch {
+      } catch (error) {
         updateMessage(activeConversationId, assistantId, {
-          content: 'The lab hit an error while processing this request.',
+          content:
+            error?.message || 'The lab hit an error while processing this request.',
           status: 'error',
           timestamp: new Date().toISOString(),
         });
@@ -204,7 +241,7 @@ export function useConversations() {
         setIsSending(false);
       }
     },
-    [activeConversationId, conversations, isSending, addMessage, updateMessage, maybeAutoTitle]
+    [activeConversationId, conversations, isSending, deepMode, addMessage, updateMessage, maybeAutoTitle]
   );
 
   const handleDeleteConversation = useCallback(
@@ -237,5 +274,8 @@ export function useConversations() {
     updateMessage,
     sendMessage,
     isSending,
+    deepMode,
+    setDeepMode,
+    composerSuggestions,
   };
 }

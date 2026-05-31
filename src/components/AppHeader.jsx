@@ -6,9 +6,12 @@ export default function AppHeader() {
       <div className="app-header-brand">
         <div className="app-header-titles">
           <div className="app-header-title-row">
-            <h1 className="app-header-title">Gray Matter LABS</h1>
+            <h1 className="app-header-title">
+              <span className="app-header-title-main">Gray Matter</span>
+              <span className="app-header-title-labs">LABS</span>
+            </h1>
             <div className="app-header-status">
-              <span className="status-dot" aria-hidden="true" />
+              <span className="pulse-dot" aria-hidden="true" />
               Lab Online
             </div>
           </div>

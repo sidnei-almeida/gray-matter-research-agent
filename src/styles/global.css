@@ -1,6 +1,9 @@
 @import './tokens.css';
+@import './animations.css';
 @import './native-theme.css';
 @import './lab-dialog.css';
+@import './layout.css';
+@import './polish.css';
 
 *,
 *::before,
@@ -17,17 +20,19 @@ body,
 
 body {
   margin: 0;
-  background-color: var(--bg-app);
+  background-color: var(--bg-primary);
   background-image:
-    linear-gradient(rgba(4, 12, 5, 0.38), rgba(3, 9, 4, 0.52)),
+    linear-gradient(rgba(8, 12, 8, 0.72), rgba(8, 12, 8, 0.88)),
     url('../../images/background 2.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--text-primary);
-  font-family: var(--font-sans);
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
@@ -48,10 +53,19 @@ a {
 .panel {
   background: var(--bg-panel);
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 0 rgba(76, 175, 80, 0.04) inset;
 }
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.card:not(.assistant-bubble):not(.user-bubble):not(.message-clarification):hover {
+  background: var(--bg-card-hover);
 }

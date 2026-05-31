@@ -1,10 +1,12 @@
 import {
   API_BASE_URL,
   CHAT_TIMEOUT_MS,
+  RESEARCH_TIMEOUT_MS,
   fetchWithTimeout,
   formatApiError,
   requestJson,
 } from './apiClient';
+import { normalizeAgentResponse } from '../utils/agentResponseNormalizer';
 
 export async function checkHealth() {
   try {
@@ -40,13 +42,38 @@ export async function sendChatMessage(messages) {
     const data = await response.json();
     const processingTime = (performance.now() - start) / 1000;
 
+    return normalizeAgentResponse(data, processingTime);
+  } catch (error) {
+    throw new Error(formatApiError(error));
+  }
+}
+
+/**
+ * Deep research mode — single question, richer sources (POST /api/research).
+ */
+export async function sendResearchMessage(question, { depth = 'deep', maxSources = 8 } = {}) {
+  const start = performance.now();
+
+  try {
+    const data = await requestJson(
+      `${API_BASE_URL}/api/research`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: question.trim(),
+          depth,
+          max_sources: maxSources,
+        }),
+      },
+      RESEARCH_TIMEOUT_MS
+    );
+
+    const processingTime = (performance.now() - start) / 1000;
+    const normalized = normalizeAgentResponse(data, processingTime);
     return {
-      content: data.message?.content || data.answer || '',
-      toolsUsed: data.tools_used || [],
-      processingTime: data.processing_time ?? processingTime,
-      structured: data.structured || null,
-      sources: data.structured?.sources || [],
-      toolUsed: 'agent',
+      ...normalized,
+      researchDepth: data.depth || depth,
     };
   } catch (error) {
     throw new Error(formatApiError(error));
