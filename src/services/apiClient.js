@@ -2,7 +2,8 @@ export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || 'https://salmeida-langchain-agent.hf.space';
 
 export const REQUEST_TIMEOUT_MS = 9000;
-export const CHAT_TIMEOUT_MS = 25000;
+export const CHAT_TIMEOUT_MS = 90000;
+export const RESEARCH_TIMEOUT_MS = 120000;
 export const MAX_INPUT_LENGTH = 2000;
 
 export async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT_MS) {

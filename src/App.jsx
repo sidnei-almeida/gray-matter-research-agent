@@ -16,6 +16,9 @@ function AppContent() {
     deleteConversation,
     sendMessage,
     isSending,
+    deepMode,
+    setDeepMode,
+    composerSuggestions,
   } = useConversations();
 
   return (
@@ -28,7 +31,14 @@ function AppContent() {
         onDeleteConversation={deleteConversation}
       />
       <AppHeader />
-      <ChatWorkspace conversation={activeConversation} onSend={sendMessage} isSending={isSending} />
+      <ChatWorkspace
+        conversation={activeConversation}
+        onSend={sendMessage}
+        isSending={isSending}
+        deepMode={deepMode}
+        onDeepModeChange={setDeepMode}
+        composerSuggestions={composerSuggestions}
+      />
       <LabToolsPanel onPromptSelect={sendMessage} />
     </AppShell>
   );

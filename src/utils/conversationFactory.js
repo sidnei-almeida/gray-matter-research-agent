@@ -10,6 +10,7 @@ export function createWelcomeMessage() {
     content: WELCOME_MESSAGE,
     timestamp: new Date().toISOString(),
     status: 'sent',
+    localOnly: true,
   };
 }
 

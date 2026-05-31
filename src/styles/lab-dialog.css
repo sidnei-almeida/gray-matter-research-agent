@@ -27,7 +27,7 @@
   border-color: var(--border-strong);
   box-shadow:
     0 24px 48px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(151, 196, 85, 0.08) inset;
+    0 0 0 1px var(--green-glow) inset;
   animation: lab-dialog-in 0.22s ease-out;
 }
 
@@ -69,11 +69,11 @@
 
 .lab-dialog-kicker {
   margin: 0 0 0.2rem;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--accent-green);
+  color: var(--green-primary);
 }
 
 .lab-dialog-title {
@@ -124,13 +124,13 @@
 }
 
 .lab-dialog-btn--primary {
-  background: linear-gradient(180deg, rgba(151, 196, 85, 0.28), rgba(151, 196, 85, 0.14));
+  background: linear-gradient(180deg, var(--green-primary), var(--green-dim));
   border-color: var(--border-strong);
   color: var(--accent-toxic);
 }
 
 .lab-dialog-btn--primary:hover {
-  background: linear-gradient(180deg, rgba(151, 196, 85, 0.38), rgba(151, 196, 85, 0.2));
+  background: linear-gradient(180deg, var(--accent-toxic), var(--green-primary));
 }
 
 .lab-dialog-btn--danger {

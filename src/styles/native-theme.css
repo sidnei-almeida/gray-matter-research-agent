@@ -5,7 +5,7 @@ html {
 }
 
 ::selection {
-  background: rgba(151, 196, 85, 0.32);
+  background: var(--green-glow);
   color: var(--text-primary);
 }
 
@@ -14,7 +14,7 @@ html {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-green);
+  outline: 2px solid var(--green-primary);
   outline-offset: 2px;
 }
 
@@ -28,36 +28,32 @@ input:focus-visible {
 /* Scrollbars — Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(151, 196, 85, 0.38) rgba(5, 8, 5, 0.85);
+  scrollbar-color: var(--border-accent) transparent;
 }
 
-/* Scrollbars — Chromium / WebKit */
+/* Scrollbars — WebKit (section 9) */
 ::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(5, 8, 5, 0.75);
-  border-radius: 9px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(151, 196, 85, 0.28);
-  border-radius: 9px;
-  border: 2px solid rgba(5, 8, 5, 0.75);
-  background-clip: padding-box;
+  background: var(--border-accent);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(151, 196, 85, 0.48);
+  background: var(--green-dim);
 }
 
 ::-webkit-scrollbar-corner {
-  background: rgba(5, 8, 5, 0.85);
+  background: transparent;
 }
 
-/* Textareas and inputs */
 textarea,
 input[type='text'],
 input[type='search'],
@@ -67,11 +63,10 @@ input[type='email'] {
 
 textarea::placeholder,
 input::placeholder {
-  color: var(--text-muted);
+  color: var(--text-tertiary);
   opacity: 1;
 }
 
-/* Autofill (Chromium) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -79,7 +74,7 @@ textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
 textarea:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--text-primary);
-  -webkit-box-shadow: 0 0 0 1000px rgba(10, 16, 9, 0.95) inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-secondary) inset;
   caret-color: var(--accent-toxic);
   transition: background-color 99999s ease-out 0s;
 }

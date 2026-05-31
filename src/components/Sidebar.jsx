@@ -16,7 +16,10 @@ export default function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-brand">
         <GmLogo variant="compact" />
-        <span className="sidebar-status">Lab Online</span>
+        <span className="sidebar-status">
+          <span className="pulse-dot" aria-hidden="true" />
+          Lab Online
+        </span>
       </div>
 
       <button type="button" className="new-chat-button" onClick={onCreateConversation}>
