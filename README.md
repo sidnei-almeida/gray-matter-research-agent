@@ -35,7 +35,7 @@
 
 The frontend owns **conversation state** (titles, messages, active session) and persists everything in **localStorage**. The backend stays **stateless**: each request carries recent context; the API does not manage sessions.
 
-> **Production agent:** `https://salmeida-langchain-agent.hf.space` — override with `VITE_API_BASE_URL` if you host your own Space.
+> **Production agent:** served from this same Vercel deployment at `/api` — set `VITE_API_BASE_URL` only if you point the frontend at a different backend origin.
 
 ---
 

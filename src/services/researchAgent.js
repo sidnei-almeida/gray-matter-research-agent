@@ -10,7 +10,7 @@ import { normalizeAgentResponse } from '../utils/agentResponseNormalizer';
 
 export async function checkHealth() {
   try {
-    const data = await requestJson(`${API_BASE_URL}/health`, {
+    const data = await requestJson(`${API_BASE_URL}/api/health`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });

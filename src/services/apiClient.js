@@ -1,5 +1,4 @@
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://salmeida-langchain-agent.hf.space';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export const REQUEST_TIMEOUT_MS = 9000;
 export const CHAT_TIMEOUT_MS = 90000;
