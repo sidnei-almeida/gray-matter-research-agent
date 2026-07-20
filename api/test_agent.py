@@ -169,10 +169,10 @@ class TestEvidence(unittest.TestCase):
 class TestAPIHealth(unittest.TestCase):
     def test_health_endpoint(self):
         from fastapi.testclient import TestClient
-        from api import app
+        from index import app
 
         client = TestClient(app)
-        r = client.get("/health")
+        r = client.get("/api/health")
         self.assertEqual(r.status_code, 200)
         data = r.json()
         self.assertIn("status", data)
