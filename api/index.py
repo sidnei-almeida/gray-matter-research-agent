@@ -174,7 +174,7 @@ async def root(request: Request):
         "version": "3.0.0",
         "space_url": SPACE_PUBLIC_URL.rstrip("/"),
         "endpoints": {
-            "health": "/health",
+            "health": "/api/health",
             "query": "/api/query",
             "chat": "/api/chat",
             "research": "/api/research",
@@ -216,7 +216,7 @@ async def root(request: Request):
     return payload
 
 
-@app.get("/health", response_model=HealthResponse, tags=["General"])
+@app.get("/api/health", response_model=HealthResponse, tags=["General"])
 async def health_check():
     global agent
     try:
