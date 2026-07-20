@@ -56,3 +56,8 @@ old-research-agent/
 *.bak
 *.tmp
 .cache/
+
+# Python (api/ backend)
+__pycache__/
+*.pyc
+.pytest_cache/
