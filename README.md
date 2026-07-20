@@ -130,30 +130,59 @@ Tokens: `src/styles/tokens.css`, `global.css`, `layout.css`, `native-theme.css`,
 | Charts | Recharts (Lab Vitals) |
 | Math | Math.js |
 | State | React hooks + `localStorage` (no Redux) |
-| Agent API | LangChain backend on Hugging Face Spaces |
-| Deploy | Vercel (static SPA, `vercel.json`) |
+| Agent API | Node serverless functions in `api/` (same Vercel project) |
+| Deploy | Vercel (SPA + serverless functions, `vercel.json`) |
+
+---
+
+## Agent API
+
+The research agent runs as **Node serverless functions inside this repo** — no Python
+runtime, no separate backend to deploy. The frontend calls it same-origin at `/api`.
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/health` | GET | Readiness + configured tools |
+| `/api/tools` | GET | Tool catalogue |
+| `/api/chat` | POST | Multi-turn chat — `{messages}` |
+| `/api/query` | POST | Single question — `{question}` |
+| `/api/research` | POST | Deep research — `{question, depth, max_sources}` |
+
+Pipeline: **classify intent → plan → run tools → rank evidence → synthesize → verify**.
+Tools are arXiv (ranked with relevance scoring), Wikipedia, web search, and a calculator.
+Tooling questions (vector DBs, RAG stacks, FAISS) route web-first rather than arXiv-first.
+
+Source lives in `api/` — handlers at the top level, pipeline modules under `api/_lib/`.
 
 ---
 
 ## Environment
 
-Create `.env` from the example (all variables are **public** — no secrets):
-
 ```bash
 cp .env.example .env
 ```
 
+**Frontend** (build time, public — Vite inlines these, so changes need a redeploy):
+
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_API_BASE_URL` | LangChain agent backend | `https://salmeida-langchain-agent.hf.space` |
-| `VITE_APP_NAME` | Display name (reserved) | `Gray Matter LABS` |
-| `VITE_ARXIV_API_URL` | arXiv query endpoint (reserved) | `https://export.arxiv.org/api/query` |
-| `VITE_WIKIPEDIA_API_URL` | Wikipedia REST (reserved) | `https://en.wikipedia.org/api/rest_v1` |
-| `VITE_WEB_SEARCH_API_URL` | DuckDuckGo IA (reserved) | `https://api.duckduckgo.com/` |
+| `VITE_API_BASE_URL` | Agent backend origin | *(empty — same-origin `/api`)* |
 
-Only **`VITE_API_BASE_URL`** is read by the app today. Others are documented for upcoming service wiring.
+Leave `VITE_API_BASE_URL` unset for normal deployments. Only set it to point the
+frontend at a different backend origin.
 
-On **Vercel**, set `VITE_API_BASE_URL` only if you use a non-default agent URL, then **redeploy** (Vite inlines env at build time).
+**Serverless functions** (runtime secrets — set these in the Vercel project settings):
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | **yes** | Powers classification, synthesis and revision |
+| `GROQ_MODEL` | no | Defaults to `llama-3.3-70b-versatile` |
+| `TAVILY_API_KEY` | no | Better web results; falls back to DuckDuckGo when unset |
+| `GRAY_MATTER_API_KEY` | no | Gates the API behind `X-API-Key` / Bearer |
+| `CORS_ORIGINS` | no | Comma-separated allowlist; `*` by default |
+
+Without `GROQ_API_KEY` the API still searches and returns evidence, but cannot
+synthesize prose — it degrades to a raw evidence summary.
 
 ---
 
@@ -192,9 +221,9 @@ npm run generate:icons
 
 1. Import this repository on [Vercel](https://vercel.com/new).
 2. Framework preset: **Vite** (or auto from `vercel.json`).
-3. Optional environment variable:
-   - `VITE_API_BASE_URL` = your Hugging Face Space URL
-4. Deploy.
+3. Add the environment variable **`GROQ_API_KEY`** (required — the agent needs it).
+   Optionally add `TAVILY_API_KEY` for better web search.
+4. Deploy. The SPA and the `/api` functions ship together from this one project.
 
 ```bash
 npm i -g vercel
@@ -202,9 +231,12 @@ vercel
 vercel --prod
 ```
 
+To run the API locally alongside the frontend, use `vercel dev` instead of
+`npm run dev` — plain Vite serves the SPA only, not the `/api` functions.
+
 | Asset / config | Purpose |
 |----------------|---------|
-| `vercel.json` | Build `dist/`, SPA rewrites, cache headers |
+| `vercel.json` | Build `dist/`, function config, SPA rewrites, cache headers |
 | `public/site.webmanifest` | Installable PWA metadata |
 | `public/favicon.svg` · PNG set | Browser and mobile icons |
 | `public/og-image.png` | Social preview |

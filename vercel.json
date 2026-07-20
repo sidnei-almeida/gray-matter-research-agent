@@ -5,9 +5,9 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "functions": {
-    "api/index.py": { "maxDuration": 120 }
+    "api/*.js": { "maxDuration": 120, "memory": 1024 }
   },
-  "rewrites": [{ "source": "/((?!assets/|.*\\..*).*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/((?!api/|assets/|.*\\..*).*)", "destination": "/index.html" }],
   "headers": [
     {
       "source": "/assets/(.*)",
