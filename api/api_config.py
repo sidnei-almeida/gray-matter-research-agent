@@ -27,7 +27,7 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
         if not self.api_key:
             return await call_next(request)
 
-        if request.url.path in ("/health", "/", "/docs", "/openapi.json", "/redoc"):
+        if request.url.path in ("/api/health", "/", "/docs", "/openapi.json", "/redoc"):
             return await call_next(request)
 
         provided = request.headers.get("X-API-Key") or request.headers.get(
