@@ -1,7 +1,7 @@
 /** Answer synthesis from ranked evidence. */
 
 import { formatEvidenceForLlm } from './evidence.js';
-import { chatComplete } from './llm.js';
+import { chatComplete, REASONING_EFFORT_BY_DEPTH } from './llm.js';
 import { buildSystemPrompt, formatMessagesForLlm } from './messages.js';
 import { SYNTHESIS_INSTRUCTION } from './prompts.js';
 
@@ -33,7 +33,10 @@ ${SYNTHESIS_INSTRUCTION}
   );
 
   try {
-    state.answer = await chatComplete(context);
+    state.answer = await chatComplete(context, {
+      reasoningEffort: REASONING_EFFORT_BY_DEPTH[state.depth] || 'medium',
+      maxTokens: state.depth === 'deep' ? 3200 : 2048,
+    });
     if (!state.answer) {
       state.answer = fallbackAnswer(state);
       state.limitations.push('LLM returned an empty answer; showing evidence summary.');

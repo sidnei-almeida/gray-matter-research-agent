@@ -41,6 +41,9 @@ export default withApi(['POST'], async (req, res) => {
       confidence: payload.confidence,
       limitations: payload.limitations,
       follow_up_questions: payload.follow_up_questions,
+      mode: payload.mode,
+      reasoning_effort: payload.reasoning_effort,
+      agent_steps: payload.agent_steps,
       structured: payload.structured,
       processing_time: processingTime,
     });

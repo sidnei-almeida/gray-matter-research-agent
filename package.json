@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "generate:icons": "bash scripts/generate-favicons.sh"
+    "generate:icons": "bash scripts/generate-favicons.sh",
+    "test:agent": "node --env-file-if-exists=.env scripts/test-agent.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

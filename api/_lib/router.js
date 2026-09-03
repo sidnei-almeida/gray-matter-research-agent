@@ -1,6 +1,12 @@
-/** Intent classification — LLM with heuristic fallback and tooling-aware overrides. */
+/**
+ * Intent classification for the deterministic fallback pipeline.
+ *
+ * The agentic loop routes itself through native tool calling; this classifier
+ * only runs when that loop is unavailable. It uses strict JSON Schema output
+ * so the shape is guaranteed, with the keyword heuristics as a last resort.
+ */
 
-import { chatComplete } from './llm.js';
+import { chatCompleteJson } from './llm.js';
 import { extractPaperTopic, isValidPaperTopic } from './arxivSearch.js';
 
 export const INTENTS = [
@@ -336,15 +342,34 @@ function heuristicClassify(query, depth = 'standard') {
   });
 }
 
-function parseClassifierJson(text) {
-  const match = String(text || '').trim().match(/\{[\s\S]*\}/);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]);
-  } catch {
-    return null;
-  }
-}
+/** Strict schema — every field required, per Groq's structured-output rules. */
+const CLASSIFIER_SCHEMA = {
+  name: 'research_intent',
+  schema: {
+    type: 'object',
+    properties: {
+      intent: { type: 'string', enum: INTENTS },
+      tools_required: { type: 'array', items: { type: 'string', enum: TOOL_NAMES } },
+      tools_optional: { type: 'array', items: { type: 'string', enum: TOOL_NAMES } },
+      needs_clarification: { type: 'boolean' },
+      clarification_question: { type: 'string' },
+      research_depth: { type: 'string', enum: ['quick', 'standard', 'deep'] },
+      query_rewrite: { type: 'string' },
+      reason: { type: 'string' },
+    },
+    required: [
+      'intent',
+      'tools_required',
+      'tools_optional',
+      'needs_clarification',
+      'clarification_question',
+      'research_depth',
+      'query_rewrite',
+      'reason',
+    ],
+    additionalProperties: false,
+  },
+};
 
 /** LLM classification with safe heuristic fallback and routing overrides. */
 export async function classifyIntent(query, depth = 'standard') {
@@ -353,53 +378,53 @@ export async function classifyIntent(query, depth = 'standard') {
     .replace('{query}', query);
 
   try {
-    const content = await chatComplete([
-      {
-        role: 'system',
-        content:
-          'You classify research and technology queries. ' +
-          'Route vector DB / RAG tooling questions to web_search, not arXiv-only. ' +
-          'Return JSON only.',
-      },
-      { role: 'user', content: prompt },
-    ]);
+    const data = await chatCompleteJson(
+      [
+        {
+          role: 'system',
+          content:
+            'You classify research and technology queries. ' +
+            'Route vector DB / RAG tooling questions to web_search, not arXiv-only.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      CLASSIFIER_SCHEMA,
+      { reasoningEffort: 'low', maxTokens: 900 }
+    );
 
-    const data = parseClassifierJson(content);
-    if (data) {
-      let intent = data.intent || 'general_chat';
-      if (!INTENTS.includes(intent)) intent = 'general_chat';
+    let intent = data.intent || 'general_chat';
+    if (!INTENTS.includes(intent)) intent = 'general_chat';
 
-      const tools = normalizeTools(data.tools_required || []);
-      const optional = normalizeTools(data.tools_optional || []);
+    const tools = normalizeTools(data.tools_required || []);
+    const optional = normalizeTools(data.tools_optional || []);
 
-      let rd = data.research_depth || depth;
-      if (!['quick', 'standard', 'deep'].includes(rd)) rd = depth;
+    let rd = data.research_depth || depth;
+    if (!['quick', 'standard', 'deep'].includes(rd)) rd = depth;
 
-      let rewrite = String(data.query_rewrite || query).trim();
-      if (!isToolingQuery(query) && !isExplicitPaperRequest(query)) {
-        const extracted = extractPaperTopic(query);
-        if (extracted && isValidPaperTopic(extracted)) {
-          rewrite = extracted;
-        } else if (!isValidPaperTopic(rewrite)) {
-          rewrite = extracted || query;
-        }
+    let rewrite = String(data.query_rewrite || query).trim();
+    if (!isToolingQuery(query) && !isExplicitPaperRequest(query)) {
+      const extracted = extractPaperTopic(query);
+      if (extracted && isValidPaperTopic(extracted)) {
+        rewrite = extracted;
       } else if (!isValidPaperTopic(rewrite)) {
-        rewrite = query;
+        rewrite = extracted || query;
       }
-
-      const result = makeIntent({
-        intent,
-        tools_required: tools,
-        tools_optional: optional,
-        needs_clarification: Boolean(data.needs_clarification),
-        clarification_question: String(data.clarification_question || ''),
-        research_depth: rd,
-        query_rewrite: rewrite,
-        reason: String(data.reason || ''),
-      });
-
-      return applyRoutingOverrides(result, query);
+    } else if (!isValidPaperTopic(rewrite)) {
+      rewrite = query;
     }
+
+    const result = makeIntent({
+      intent,
+      tools_required: tools,
+      tools_optional: optional,
+      needs_clarification: Boolean(data.needs_clarification),
+      clarification_question: String(data.clarification_question || ''),
+      research_depth: rd,
+      query_rewrite: rewrite,
+      reason: String(data.reason || ''),
+    });
+
+    return applyRoutingOverrides(result, query);
   } catch (error) {
     console.warn('Intent classifier LLM failed, using heuristics:', error.message);
   }

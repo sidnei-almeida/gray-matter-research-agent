@@ -23,6 +23,10 @@ export function buildEnrichedResponse(result, question = null) {
     confidence: result?.confidence ?? 0.5,
     limitations: result?.limitations || [],
     follow_up_questions: result?.follow_up_questions || [],
+    // Which path served the request: the agentic loop or the deterministic fallback.
+    mode: result?.mode ?? null,
+    reasoning_effort: result?.reasoning_effort ?? null,
+    agent_steps: result?.agent_steps || [],
     structured: {
       sources: legacySources.length ? legacySources.slice(0, 20) : null,
       authors: uniqueAuthors.length ? uniqueAuthors.slice(0, 10) : null,

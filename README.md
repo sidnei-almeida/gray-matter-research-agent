@@ -5,14 +5,12 @@
 <h1 align="center">Gray Matter LABS</h1>
 
 <p align="center">
-  <strong>React · Vite · LangChain Agent · ArXiv · Wikipedia · Live Web</strong><br />
+  <strong>React · Vite · gpt-oss-120b Agent · ArXiv · Wikipedia · Live Web</strong><br />
   <em>A precision research chat workspace with a dark-lab aesthetic and multi-session notebooks.</em>
 </p>
 
 <p align="center">
   <a href="https://github.com/sidnei-almeida/gray-matter-research-agent"><strong>View on GitHub</strong></a>
-  &nbsp;·&nbsp;
-  <a href="https://salmeida-langchain-agent.hf.space">Agent API (Hugging Face)</a>
   &nbsp;·&nbsp;
   <a href="#deploy-on-vercel">Deploy on Vercel</a>
 </p>
@@ -22,7 +20,8 @@
   <img src="https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white" alt="Vite 6" />
   <img src="https://img.shields.io/badge/Lucide-Icons-F56565?logo=lucide&logoColor=white" alt="Lucide" />
   <img src="https://img.shields.io/badge/Markdown-GFM-000000?logo=markdown&logoColor=white" alt="Markdown GFM" />
-  <img src="https://img.shields.io/badge/Agent-LangChain-1C3C3C?logo=langchain&logoColor=white" alt="LangChain" />
+  <img src="https://img.shields.io/badge/Model-gpt--oss--120b-412991?logo=openai&logoColor=white" alt="gpt-oss-120b" />
+  <img src="https://img.shields.io/badge/Inference-Groq-F55036?logo=groq&logoColor=white" alt="Groq" />
   <img src="https://img.shields.io/badge/Storage-localStorage-97C455" alt="localStorage" />
   <img src="https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white" alt="Vercel" />
 </p>
@@ -52,7 +51,7 @@ flowchart LR
   USER[Researcher]
   UI[Gray Matter LABS UI]
   LS[(localStorage)]
-  API[LangChain Agent API]
+  API[Agent API — gpt-oss-120b]
   ARXIV[arXiv API]
   WIKI[Wikipedia REST]
   WEB[DuckDuckGo IA]
@@ -130,6 +129,7 @@ Tokens: `src/styles/tokens.css`, `global.css`, `layout.css`, `native-theme.css`,
 | Charts | Recharts (Lab Vitals) |
 | Math | Math.js |
 | State | React hooks + `localStorage` (no Redux) |
+| Agent | `openai/gpt-oss-120b` on Groq, native tool calling |
 | Agent API | Node serverless functions in `api/` (same Vercel project) |
 | Deploy | Vercel (SPA + serverless functions, `vercel.json`) |
 
@@ -148,11 +148,48 @@ runtime, no separate backend to deploy. The frontend calls it same-origin at `/a
 | `/api/query` | POST | Single question — `{question}` |
 | `/api/research` | POST | Deep research — `{question, depth, max_sources}` |
 
-Pipeline: **classify intent → plan → run tools → rank evidence → synthesize → verify**.
-Tools are arXiv (ranked with relevance scoring), Wikipedia, web search, and a calculator.
-Tooling questions (vector DBs, RAG stacks, FAISS) route web-first rather than arXiv-first.
+### How the agent works
 
-Source lives in `api/` — handlers at the top level, pipeline modules under `api/_lib/`.
+The model is `openai/gpt-oss-120b` on Groq, driven through **native tool calling**. It is
+handed four functions — `web_search`, `wikipedia_lookup`, `arxiv_search`, `calculate` — and
+decides for itself which to call, reads the results, and may search again with a sharper
+query before answering. Multi-hop questions therefore work without hard-coded routing.
+
+```
+user query → agent loop ⇄ tools → rank evidence → verify → answer
+                             ↑ the model re-queries when results are thin
+```
+
+Evidence is captured as the tools run, not parsed back out of the prose, so every citation
+the UI shows is traceable to an actual search result.
+
+Request depth maps onto the model's reasoning budget:
+
+| Depth | `reasoning_effort` | Model turns | Tool calls |
+|-------|--------------------|-------------|------------|
+| `quick` | `low` | 2 | 3 |
+| `standard` | `medium` | 4 | 6 |
+| `deep` | `high` | 6 | 10 |
+
+If the loop cannot run — no API key, Groq outage, empty completion — the request falls back
+to the earlier deterministic pipeline (**classify → plan → run tools → rank → synthesize**),
+whose classifier uses strict JSON Schema output with keyword heuristics as a last resort.
+The response reports which path ran in its `mode` field.
+
+Source lives in `api/` — handlers at the top level, agent modules under `api/_lib/`:
+`llm.js` (Groq transport), `agentLoop.js` (the loop), `toolSchemas.js` (function definitions),
+`tools.js` (implementations), `evidence.js`, `verifier.js`.
+
+### Testing the agent locally
+
+```bash
+echo 'GROQ_API_KEY=gsk_...' >> .env   # .env is gitignored
+npm run test:agent
+npm run test:agent -- "your question" deep
+```
+
+Prints the tools the model chose, the evidence gathered and the answer, so routing
+regressions show up without a deploy.
 
 ---
 
@@ -175,14 +212,18 @@ frontend at a different backend origin.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GROQ_API_KEY` | **yes** | Powers classification, synthesis and revision |
-| `GROQ_MODEL` | no | Defaults to `llama-3.3-70b-versatile` |
+| `GROQ_API_KEY` | **yes** | Powers the agent loop, classification and revision |
+| `GROQ_MODEL` | no | Defaults to `openai/gpt-oss-120b`; must support tool calling |
 | `TAVILY_API_KEY` | no | Better web results; falls back to DuckDuckGo when unset |
 | `GRAY_MATTER_API_KEY` | no | Gates the API behind `X-API-Key` / Bearer |
 | `CORS_ORIGINS` | no | Comma-separated allowlist; `*` by default |
 
 Without `GROQ_API_KEY` the API still searches and returns evidence, but cannot
 synthesize prose — it degrades to a raw evidence summary.
+
+> **Model note.** `llama-3.3-70b-versatile` was shut down by Groq on 2026-08-16. Any
+> deployment still pinning it via `GROQ_MODEL` will fail; unset the variable or point it
+> at `openai/gpt-oss-120b`.
 
 ---
 
