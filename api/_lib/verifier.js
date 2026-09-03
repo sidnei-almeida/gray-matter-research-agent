@@ -71,10 +71,13 @@ ${state.verification_notes.map((i) => `- ${i}`).join('\n')}
 ${VERIFIER_REVISION_INSTRUCTION}
 `;
 
-    const revised = await chatComplete([
-      { role: 'system', content: 'You are a careful scientific editor.' },
-      { role: 'user', content: prompt },
-    ]);
+    const revised = await chatComplete(
+      [
+        { role: 'system', content: 'You are a careful scientific editor.' },
+        { role: 'user', content: prompt },
+      ],
+      { reasoningEffort: 'low', maxTokens: 2048 }
+    );
 
     if (revised && revised.length > 50) state.answer = revised;
   } catch (error) {

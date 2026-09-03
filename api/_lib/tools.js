@@ -92,8 +92,12 @@ export function extractCalcExpression(query) {
   return null;
 }
 
-export function runCalculator(query) {
-  const expr = extractCalcExpression(query) || query;
+/**
+ * @param {string} input a bare expression, or a sentence to extract one from
+ * @param {{extract?: boolean}} options set `extract` when `input` is prose
+ */
+export function runCalculator(input, { extract = false } = {}) {
+  const expr = (extract ? extractCalcExpression(input) : null) || input;
   const result = calculator(expr);
   return makeEvidence({
     title: `Calculation: ${expr}`,
@@ -120,8 +124,8 @@ export async function runWikipedia(query) {
   ];
 }
 
-export async function runWeb(query) {
-  const { results, provider } = await searchWeb(query, 5);
+export async function runWeb(query, maxResults = 5) {
+  const { results, provider } = await searchWeb(query, maxResults);
 
   return results.map((r, i) =>
     makeEvidence({
@@ -135,13 +139,16 @@ export async function runWeb(query) {
   );
 }
 
-export async function runArxiv(query, { userQuery = null, depth = 'standard', recentOnly = false } = {}) {
+export async function runArxiv(
+  query,
+  { userQuery = null, depth = 'standard', recentOnly = false, maxPapers = null } = {}
+) {
   const original = userQuery || query;
   const topic = resolveArxivTopic(original, query);
-  const maxPapers = depth === 'deep' ? 5 : 3;
+  const resolvedMaxPapers = maxPapers ?? (depth === 'deep' ? 5 : 3);
 
   const structured = await searchScientificPapersStructured(topic, {
-    maxPapers,
+    maxPapers: resolvedMaxPapers,
     recentOnly: recentOnly || wantsRecentPapers(original),
   });
 
@@ -200,7 +207,7 @@ export async function executeTools(state) {
     try {
       if (tool === 'calculator') {
         state.tools_used.push('calculator');
-        state.evidence.push(runCalculator(query));
+        state.evidence.push(runCalculator(query, { extract: true }));
       } else if (tool === 'wikipedia') {
         const evs = await runWikipedia(query);
         state.tools_used.push('wikipedia');
